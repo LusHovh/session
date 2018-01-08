@@ -1,74 +1,89 @@
 <?php
-require __DIR__.'/../vendor/autoload.php';
 
-require __DIR__.'/../config/bootstrap.php';
+interface MessageComposer {
+  public function setFrom($_from);
+  public function setTo($_to);
+  public function setBody($_message);
+}
 
-ini_set('session.name', 'VILUSIK');
+class Message implements MessageComposer {
 
-session_start();
+  private $to;
+  private $from;
+  private $body;
 
-$app = new Slim\App();
+  /*setters start*/
 
-$app->get('/', function ($request, $response, $args) {
+  public function setTo($_to)
+  {
+    $this->to = $_to;
+  }
 
-	/*init template engine*/
-    $templates = new League\Plates\Engine(__DIR__.'/../views');
+  public function setFrom($_from)
+  {
+    $this->from = $_from;
+  }
 
-	/*render templete and get html*/
-	$variables = [
-		'title' => 'Session',
-		'user' => getAuthUser(),
-	];
-    $html = $templates->render('home', $variables);
-	/*echo html*/
-    return $response->write($html);
-});
+  public function setBody($_body)
+  {
+    $this->body = $_body;
+  }
+  /*setters end*/
 
-$app->get('/protected', function ($request, $response, $args) {
-    $user = getAuthUser();
-    $html = 'You should login';
-    if($user) {
-		/*init template engine*/
-	    $templates = new League\Plates\Engine(__DIR__.'/../views');
+  /*getters start*/
+  public function getTo()
+  {
+    return isset($this->to) ? $this->to : 'default_to@mail.ru';
+  }
 
-		/*render templete and get html*/
-		$variables = [
-			'title' => 'Protected',
-			'user' => $user
-		];
-	    $html = $templates->render('protected', $variables);
+  public function getFrom()
+  {
+    return isset($this->from) ? $this->from : 'default_from@mail.ru';
+  }
+
+  public function getBody()
+  {
+    return $this->body;
+  }
+
+  /*getters end*/
+
+}
+
+class Mail {
+
+  public static function html($msg, $callback = null )
+  {
+    $message = new Message;
+    $message->setBody($msg);
+    if($callback) {
+      $callback($message);
     }
+    echo "SENDING MESSAGE FROM {$message->getFrom()} TO {$message->getTo()} <br>
+    MESSAGE IS {$message->getBody()}<br>
+    message body is TEXT/HTML";
+  }
 
-	/*echo html*/
-    return $response->write($html);
+  public static function raw($msg, $callback = null)
+  {
+    $message = new Message;
+    $message->setBody($msg);
+    if($callback) {
+      $callback($message);
+    }
+    $body = htmlentities($message->getBody());
+    echo "SENDING MESSAGE FROM {$message->getFrom()} TO {$message->getTo()} <br>
+    MESSAGE IS {$body}<br>
+    message body is PLAIN/HTML";
+  }
+}
+
+$x = 'I am global var from different tesaneliutyan tiruyt';
+
+
+Mail::html('<b>HEllo with html</b> qez', function($m) use ($x) {
+    $m->setTo('changed@mail.com');
+    echo $x;
 });
-
-$app->get('/logout', function ($request, $response, $args) {
-	if(isset($_SESSION['user_id'])) {
-		unset($_SESSION['user_id']);
-	}
-	header('Location: /');
-});
-
-$app->post('/login', function ($request, $response, $args) {
-
-	$username = isset($_POST['username']) ? $_POST['username'] : null;
-	$password = isset($_POST['password']) ? $_POST['password'] : null;
-	if($username && $password) {
-		$db_host =  getenv('DB_HOST');
-		$db_username = getenv('DB_USER');
-		$db_password = getenv('DB_PASSWORD');
-		$db_name = getenv('DB_NAME');
-
-		$mysqli = new mysqli($db_host, $db_username, $db_password, $db_name);
-		$query = "SELECT * FROM users WHERE `username` = '{$username}'";
-		$query_result = $mysqli->query($query);
-		$user = $query_result->fetch_assoc();	
-		if($user && md5($password) === $user['password']) {
-			$_SESSION['user_id'] = $user['id'];
-		}
-	}
-	header('Location: /');
-});
-
-$app->run();
+echo "<br><br><br>";
+Mail::raw('<b>HEllo without html</b> qez');

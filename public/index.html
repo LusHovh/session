@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>JS CALLBACKS</title>
+  </head>
+  <script>
+    class Example {
+      run(url, callback) {
+        const time = getRandomInt(1, 5) + '000';
+
+        console.log(`calling to ${url} and waiting for response, i will call you my nigga with data after ${time} ms`);
+        const data = Math.random();
+        setTimeout(function() {
+          console.log('brnvi hesa ktpvem es en loopi mejic em ekel u anonimous functionn em im mej el kanchum em xuy ego znaet esim inch callback vor@ vor esim kto nibud khaytarari :* de pachik axxchiii')
+          callback(data);
+        }, time);
+        console.log('hamozvi kyanqs vor esi mi thread-a u block chi linum u es hima kptvem naxqan en random u erkar message@ de jijil axchiiiiiii')
+      }
+    }
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    const foo = new Example;
+    foo.run('lupine.com/lll_ttt', function(data) {
+      console.log(`ahahaha nigga indz kanchel en esim urduc es callback em es prosto shistyorka em im gorc@ indz uxarkac datan qez talna u havelyal inch vor miban anelna datan el esika kyanqid mernem ${data}`)
+    });
+
+  </script>
+  <body>
+
+  </body>
+</html>
